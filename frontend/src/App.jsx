@@ -16,12 +16,12 @@ function App() {
 
   const fetchMovies = async () => {
     try {
-      const response = await fetch('/api/movies')
+      const response = await fetch('http://localhost:8000/movies')
       if (!response.ok) throw new Error('Failed to fetch movies')
       const data = await response.json()
       setMovies(data.movies)
     } catch (err) {
-      setError('Could not connect to the API. Are you running the backend server?')
+      setError(err.message)
     }
   }
 
@@ -40,7 +40,7 @@ function App() {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(`/api/recommend/${encodeURIComponent(selectedMovie)}`)
+      const response = await fetch(`http://localhost:8000/recommend/${encodeURIComponent(selectedMovie)}`)
       if (!response.ok) throw new Error('Recommendation failed (Movie might not exist)')
       const data = await response.json()
       
@@ -66,19 +66,16 @@ function App() {
         <p className="subtitle">Discover your next cinematic journey.</p>
         
         <div className="input-group">
-          <input 
-            type="text"
-            list="movies-list"
+          <select 
             value={selectedMovie} 
             onChange={(e) => setSelectedMovie(e.target.value)}
             className="movie-select"
-            placeholder="Type a movie name..."
-          />
-          <datalist id="movies-list">
+          >
+            <option value="">Select a masterpiece...</option>
             {movies.map((m, idx) => (
-              <option key={idx} value={m} />
+              <option key={idx} value={m}>{m}</option>
             ))}
-          </datalist>
+          </select>
 
           <button 
             onClick={handleRecommend} 
@@ -97,13 +94,15 @@ function App() {
             <div className="movie-grid">
               {recommendations.map((rec) => (
                 <div key={rec.id} className="movie-card">
-                  {rec.posterUrl ? (
-                    <img src={rec.posterUrl} alt={rec.title} className="movie-poster" />
-                  ) : (
-                    <div className="movie-poster-placeholder">
-                      <span>No Poster</span>
-                    </div>
-                  )}
+                  <div className="movie-poster-wrapper">
+                    {rec.posterUrl ? (
+                      <img src={rec.posterUrl} alt={rec.title} className="movie-poster" />
+                    ) : (
+                      <div className="movie-poster-placeholder">
+                        <span>No Poster</span>
+                      </div>
+                    )}
+                  </div>
                   <h3 className="movie-card-title">{rec.title}</h3>
                 </div>
               ))}
